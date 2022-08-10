@@ -206,6 +206,15 @@ class Salesforce:
             if next_page is None:
                 return
 
+    def userinfo(self) -> Dict:
+        headers = {"Authorization": "Bearer {}".format(self._access_token)}
+        resp = self.session.get(
+            "https://login.salesforce.com/services/oauth2/userinfo", headers=headers
+        )
+        resp.raise_for_status()
+        userinfo = resp.json()
+        return userinfo
+
     @backoff.on_exception(
         backoff.expo,
         (

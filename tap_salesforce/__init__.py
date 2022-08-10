@@ -49,6 +49,8 @@ def main_impl():
 
     stream = Stream(args.state)
 
+    userinfo = sf.userinfo()
+
     for stream_id, fields, replication_key in sf.get_tables():
         if not fields:
             LOGGER.info(
