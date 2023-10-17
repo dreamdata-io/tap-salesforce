@@ -261,7 +261,8 @@ class Salesforce:
                 )
 
         except SalesforceException as e:
-            if e.code != "QUERY_TIMEOUT":
+            LOGGER.info(f"SalesforceException: {e.code}")
+            if e.code not in ["QUERY_TIMEOUT", "OPERATION_TOO_LARGE"]:
                 raise e
 
             nth = (end_date - start_date).total_seconds() / shrink_window_factor
