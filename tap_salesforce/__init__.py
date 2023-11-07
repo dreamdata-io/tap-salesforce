@@ -32,15 +32,14 @@ CONFIG = {
 
 def main_impl():
     args = singer_utils.parse_args(REQUIRED_CONFIG_KEYS)
-    CONFIG.update(args.config)
 
     sf = Salesforce(
-        refresh_token=CONFIG["refresh_token"],
-        client_id=CONFIG["client_id"],
-        client_secret=CONFIG["client_secret"],
+        refresh_token=args.config["refresh_token"],
+        client_id=args.config["client_id"],
+        client_secret=args.config["client_secret"],
     )
 
-    start_date_conf = CONFIG["start_date"]
+    start_date_conf = args.config["start_date"]
 
     config_start = singer_utils.strptime_with_tz(start_date_conf).astimezone(
         timezone.utc
@@ -48,23 +47,29 @@ def main_impl():
     end_time = datetime.utcnow().astimezone(timezone.utc)
 
     stream = Stream(args.state)
-    sync_fields(sf, stream)
 
-    for table, fields, replication_key in sf.get_tables():
-        if not fields:
+    advanced_features_enabled = args.config.pop("advanced_features_enabled", False)
+    for table in sf.get_tables(advanced_features_enabled):
+        if not table.fields:
             LOGGER.info(
                 f"skipping stream {table.name} since it does not exist on this account"
             )
             continue
 
+        if table.should_sync_fields:
+            stream_id = f"{table.name}Fields"
+            for field in table.fields:
+                stream.write_record(field, stream_id)
+
         LOGGER.info(f"processing stream {table.name}")
 
         start_time = (
-            stream.get_stream_state(table.name, replication_key) or config_start
+            stream.get_stream_state(table.name, table.replication_key) or config_start
         )
 
+        field_names = [field["name"] for field in table.fields]
         try:
-            if table.name in ["Task", "ContactHistory"]:
+            if table.apply_weekly_rule:
                 previous_datetime = start_time
 
                 for time_interval in rrule(
@@ -76,13 +81,13 @@ def main_impl():
                         sf,
                         stream,
                         table,
-                        fields,
+                        field_names,
                         start_time=previous_datetime,
                         end_time=time_interval,
                     )
                     previous_datetime = time_interval
             else:
-                sync(sf, stream, table, fields, start_time, end_time)
+                sync(sf, stream, table, field_names, start_time, end_time)
         except requests.exceptions.HTTPError as err:
 
             url = err.request.url
@@ -135,24 +140,6 @@ def sync(
             raise
         finally:
             stream.write_state()
-
-
-def sync_fields(sf: Salesforce, stream: Stream):
-    objects = [
-        "Account",
-        "Contact",
-        "Lead",
-        "Opportunity",
-        "Campaign",
-        "CampaignMember",
-        "Task",
-        "Event",
-    ]
-    for object in objects:
-        stream_id = f"{object}Fields"
-        fields = sf.describe(object).get("fields")
-        for field in fields:
-            stream.write_record(field, stream_id)
 
 
 def parse_exception(resp: requests.Response) -> Tuple[int, str, str]:
