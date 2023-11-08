@@ -111,7 +111,8 @@ class Salesforce:
             Table(name="Product2", replication_key="SystemModstamp"),
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
             Table(name="UserRole", replication_key="SystemModstamp"),
-            Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp")
+            Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
+            Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp")
         ]
         for table in tables:
             try:
@@ -222,7 +223,6 @@ class Salesforce:
         limit: Optional[int] = None,
         shrink_window_factor: int = 2,
     ):
-
         query = self.construct_query(table, fields, start_date, end_date, limit)
         try:
             if len(query) <= MAX_QUERY_LENGTH:
