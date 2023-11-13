@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Generator, Dict, List
+from typing import Optional, Dict, List, Iterator
 from datetime import datetime, timedelta
 import re
 import backoff
@@ -34,6 +34,12 @@ class Table(BaseModel):
     name: str
     primary_key: Optional[str]
     replication_key: Optional[str]
+    fields: Optional[List[str]]
+    should_sync_fields: Optional[bool] = False
+    apply_weekly_rule: Optional[bool] = False
+
+    def set_fields(self, fields: List[str]):
+        self.fields = fields
 
 
 class PrimaryKeyNotMatch(Exception):
@@ -85,27 +91,30 @@ class Salesforce:
 
         self._login()
 
-    def get_tables(self) -> Generator[Tuple[Table, List[str], str], None, None]:
+    def get_tables(self, advanced_features_enabled=False) -> Iterator[Table]:
         """returns the supported table names, as well as the replication_key"""
-        tables = [
-            Table(name="Account", replication_key="SystemModstamp", primary_key="Id"),
-            Table(name="Contact", replication_key="SystemModstamp", primary_key="Id"),
-            Table(name="ContactHistory", replication_key="CreatedDate"),
-            Table(name="Lead", replication_key="SystemModstamp", primary_key="Id"),
-            Table(name="Opportunity", replication_key="SystemModstamp", primary_key="Id"),
-            Table(name="Campaign", replication_key="SystemModstamp"),
+        free_tables = [
+            Table(name="Account", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
+            Table(name="Contact", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
+            Table(name="Opportunity", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
+        ]
+
+        advanced_tables = [
+            Table(name="ContactHistory", replication_key="CreatedDate", apply_weekly_rule=True),
+            Table(name="Lead", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
+            Table(name="Campaign", replication_key="SystemModstamp", should_sync_fields=True),
             Table(name="AccountContactRelation", replication_key="SystemModstamp"),
             Table(name="AccountContactRole", replication_key="SystemModstamp"),
             Table(name="OpportunityContactRole", replication_key="SystemModstamp"),
-            Table(name="CampaignMember", replication_key="SystemModstamp"),
+            Table(name="CampaignMember", replication_key="SystemModstamp", should_sync_fields=True),
             Table(name="OpportunityHistory", replication_key="CreatedDate"),
             Table(name="AccountHistory", replication_key="CreatedDate"),
             Table(name="LeadHistory", replication_key="CreatedDate"),
             Table(name="User", replication_key="SystemModstamp"),
             Table(name="Invoice__c", replication_key="SystemModstamp"),
             Table(name="Trial__c", replication_key="SystemModstamp"),
-            Table(name="Task", replication_key="SystemModstamp"),
-            Table(name="Event", replication_key="SystemModstamp"),
+            Table(name="Task", replication_key="SystemModstamp", should_sync_fields=True, apply_weekly_rule=True),
+            Table(name="Event", replication_key="SystemModstamp", should_sync_fields=True),
             Table(name="RecordType", replication_key="SystemModstamp"),
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
             Table(name="Product2", replication_key="SystemModstamp"),
@@ -114,10 +123,17 @@ class Salesforce:
             Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
             Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp")
         ]
-        for table in tables:
+
+        selected_tables = free_tables.copy()
+        if advanced_features_enabled:
+            LOGGER.info("advanced features enabled for account")
+            selected_tables.extend(advanced_tables)
+
+        for table in selected_tables:
             try:
-                fields = self.get_fields(table.name)
-                yield (table, fields, table.replication_key)
+                table_descriptions = self.describe(table.name)
+                table.set_fields(table_descriptions["fields"])
+                yield table
             except SalesforceException as e:
                 if e.code == "NOT_FOUND":
                     LOGGER.info(f"table '{table}' not found, skipping")
@@ -139,12 +155,6 @@ class Salesforce:
                 raise
 
             return {}
-
-    def get_fields(self, table: str) -> List[str]:
-        """returns a list of all fields and custom fields of a given table"""
-        table_descriptions = self.describe(table)
-        fields = [o["name"] for o in table_descriptions["fields"]]
-        return fields
 
     def construct_query(
         self,
@@ -184,7 +194,7 @@ class Salesforce:
 
     def field_chunker(
         self, fields: List[str], size: int
-    ) -> Generator[List[str], None, None]:
+    ) -> Iterator[List[str]]:
         field_chunk = []
         length = 0
         index = 0
@@ -198,8 +208,8 @@ class Salesforce:
                 length = 0
 
     def merge_records(
-        self, paginators: List[Generator[Dict, None, None]], table: Table
-    ) -> Generator[Dict, None, None]:
+        self, paginators: List[Iterator[Dict]], table: Table
+    ) -> Iterator[Dict]:
         for records in zip(*paginators):
             merged_record = {}
             primary_key = None
@@ -290,7 +300,7 @@ class Salesforce:
         path: str,
         data: Dict = None,
         params: Dict = None,
-    ) -> Generator[Dict, None, None]:
+    ) -> Iterator[Dict]:
         next_page: Optional[str] = path
         while True:
             resp = self._make_request(method, next_page, data=data, params=params)
