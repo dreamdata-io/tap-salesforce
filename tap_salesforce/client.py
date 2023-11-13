@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Generator, Dict, List
+from typing import Optional, Dict, List, Iterator
 from datetime import datetime, timedelta
 import re
 import backoff
@@ -91,7 +91,7 @@ class Salesforce:
 
         self._login()
 
-    def get_tables(self, advanced_features_enabled=False) -> Generator[Table]:
+    def get_tables(self, advanced_features_enabled=False) -> Iterator[Table]:
         """returns the supported table names, as well as the replication_key"""
         free_tables = [
             Table(name="Account", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
@@ -193,7 +193,7 @@ class Salesforce:
 
     def field_chunker(
         self, fields: List[str], size: int
-    ) -> Generator[List[str], None, None]:
+    ) -> Iterator[List[str]]:
         field_chunk = []
         length = 0
         index = 0
@@ -207,8 +207,8 @@ class Salesforce:
                 length = 0
 
     def merge_records(
-        self, paginators: List[Generator[Dict, None, None]], table: Table
-    ) -> Generator[Dict, None, None]:
+        self, paginators: List[Iterator[Dict]], table: Table
+    ) -> Iterator[Dict]:
         for records in zip(*paginators):
             merged_record = {}
             primary_key = None
@@ -300,7 +300,7 @@ class Salesforce:
         path: str,
         data: Dict = None,
         params: Dict = None,
-    ) -> Generator[Dict, None, None]:
+    ) -> Iterator[Dict]:
         next_page: Optional[str] = path
         while True:
             resp = self._make_request(method, next_page, data=data, params=params)
