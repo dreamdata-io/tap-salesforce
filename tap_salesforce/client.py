@@ -97,6 +97,8 @@ class Salesforce:
             Table(name="Account", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
             Table(name="Contact", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
             Table(name="Opportunity", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
+            Table(name="User", replication_key="SystemModstamp"),
+
         ]
 
         advanced_tables = [
@@ -110,7 +112,6 @@ class Salesforce:
             Table(name="OpportunityHistory", replication_key="CreatedDate"),
             Table(name="AccountHistory", replication_key="CreatedDate"),
             Table(name="LeadHistory", replication_key="CreatedDate"),
-            Table(name="User", replication_key="SystemModstamp"),
             Table(name="Invoice__c", replication_key="SystemModstamp"),
             Table(name="Trial__c", replication_key="SystemModstamp"),
             Table(name="Task", replication_key="SystemModstamp", should_sync_fields=True, apply_weekly_rule=True),
@@ -119,7 +120,6 @@ class Salesforce:
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
             Table(name="Product2", replication_key="SystemModstamp"),
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
-            Table(name="UserRole", replication_key="SystemModstamp"),
             Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
             Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp")
         ]
