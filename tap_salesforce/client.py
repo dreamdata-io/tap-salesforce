@@ -97,8 +97,7 @@ class Salesforce:
             Table(name="Account", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
             Table(name="Contact", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
             Table(name="Opportunity", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
-            Table(name="User", replication_key="SystemModstamp"),
-
+            Table(name="User", replication_key="SystemModstamp")
         ]
 
         advanced_tables = [
@@ -121,7 +120,8 @@ class Salesforce:
             Table(name="Product2", replication_key="SystemModstamp"),
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
             Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
-            Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp")
+            Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp"),
+            Table(name="Case", replication_key="SystemModstamp")
         ]
 
         selected_tables = free_tables.copy()
