@@ -53,9 +53,9 @@ class Salesforce:
     quota_percent_total: float
     quota_percent_per_run: float
     is_sandbox: bool
+    instance_url: Optional[str] = None
 
     _access_token: Optional[str] = None
-    _instance_url: Optional[str] = None
     _token_expiration_time: Optional[datetime] = None
     _metrics_http_requests: int = 0
     _metrics: Metrics
@@ -121,7 +121,7 @@ class Salesforce:
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
             Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
             Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp"),
-            Table(name="Case", replication_key="SystemModstamp")
+            Table(name="Case", replication_key="SystemModstamp", primary_key="Id")
         ]
 
         selected_tables = free_tables.copy()
@@ -331,7 +331,7 @@ class Salesforce:
 
         headers = {"Authorization": "Bearer {}".format(self._access_token)}
 
-        url = f"{self._instance_url}{path}"
+        url = f"{self.instance_url}{path}"
         resp = self.session.request(
             method, url, headers=headers, params=params, data=data
         )
@@ -375,8 +375,7 @@ class Salesforce:
             auth = resp.json()
 
             self._access_token = auth["access_token"]
-            self._instance_url = auth["instance_url"]
-
+            self.instance_url = auth["instance_url"]
             self._token_expiration_time = datetime.utcnow() + timedelta(
                 seconds=self._REFRESH_TOKEN_EXPIRATION_PERIOD
             )
