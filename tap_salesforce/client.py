@@ -120,8 +120,11 @@ class Salesforce:
             Table(name="Product2", replication_key="SystemModstamp"),
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
             Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
-            Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp"),
-            Table(name="Case", replication_key="SystemModstamp", primary_key="Id")
+            Table(
+                name="Task_Milestone__c",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+            ),
         ]
 
         selected_tables = free_tables.copy()
