@@ -94,34 +94,81 @@ class Salesforce:
     def get_tables(self, advanced_features_enabled=False) -> Iterator[Table]:
         """returns the supported table names, as well as the replication_key"""
         free_tables = [
-            Table(name="Account", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
-            Table(name="Contact", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
-            Table(name="Opportunity", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
-            Table(name="User", replication_key="SystemModstamp")
+            Table(
+                name="Account",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(
+                name="Contact",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(
+                name="Opportunity",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(name="User", replication_key="SystemModstamp"),
         ]
 
         advanced_tables = [
-            Table(name="ContactHistory", replication_key="CreatedDate", apply_weekly_rule=True),
-            Table(name="Lead", replication_key="SystemModstamp", primary_key="Id", should_sync_fields=True),
-            Table(name="Campaign", replication_key="SystemModstamp", should_sync_fields=True),
+            Table(
+                name="ContactHistory",
+                replication_key="CreatedDate",
+                apply_weekly_rule=True,
+            ),
+            Table(
+                name="Lead",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(
+                name="Campaign",
+                replication_key="SystemModstamp",
+                should_sync_fields=True,
+            ),
             Table(name="AccountContactRelation", replication_key="SystemModstamp"),
             Table(name="AccountContactRole", replication_key="SystemModstamp"),
             Table(name="OpportunityContactRole", replication_key="SystemModstamp"),
-            Table(name="CampaignMember", replication_key="SystemModstamp", should_sync_fields=True),
+            Table(
+                name="CampaignMember",
+                replication_key="SystemModstamp",
+                should_sync_fields=True,
+            ),
             Table(name="OpportunityHistory", replication_key="CreatedDate"),
             Table(name="AccountHistory", replication_key="CreatedDate"),
             Table(name="LeadHistory", replication_key="CreatedDate"),
             Table(name="Invoice__c", replication_key="SystemModstamp"),
             Table(name="Trial__c", replication_key="SystemModstamp"),
-            Table(name="Task", replication_key="SystemModstamp", should_sync_fields=True, apply_weekly_rule=True),
-            Table(name="Event", replication_key="SystemModstamp", should_sync_fields=True),
+            Table(
+                name="Task",
+                replication_key="SystemModstamp",
+                should_sync_fields=True,
+                apply_weekly_rule=True,
+            ),
+            Table(
+                name="Event", replication_key="SystemModstamp", should_sync_fields=True
+            ),
             Table(name="RecordType", replication_key="SystemModstamp"),
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
             Table(name="Product2", replication_key="SystemModstamp"),
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
             Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
-            Table(name="TrulyActivity__Truly_Activity__c", replication_key="SystemModstamp"),
-            Table(name="Case", replication_key="SystemModstamp", primary_key="Id")
+            Table(
+                name="TrulyActivity__Truly_Activity__c",
+                replication_key="SystemModstamp",
+            ),
+            Table(name="Case", replication_key="SystemModstamp", primary_key="Id"),
+            Table(
+                name="Task_Milestone__c",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+            ),
         ]
 
         selected_tables = free_tables.copy()
@@ -192,9 +239,7 @@ class Salesforce:
         query = f"{select_stm} {from_stm} {where_stm} {order_by_stm} {limit_stm}"
         return query
 
-    def field_chunker(
-        self, fields: List[str], size: int
-    ) -> Iterator[List[str]]:
+    def field_chunker(self, fields: List[str], size: int) -> Iterator[List[str]]:
         field_chunk = []
         length = 0
         index = 0
