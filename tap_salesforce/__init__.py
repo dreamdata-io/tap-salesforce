@@ -161,7 +161,7 @@ def main():
         sys.exit(2)
     except TapSalesforceInvalidCredentialsException as e:
         LOGGER.exception(str(e))
-        sys.exit(5)
+        sys.exit(1)
     except TapSalesforceException as e:
         LOGGER.exception(str(e))
         sys.exit(1)
