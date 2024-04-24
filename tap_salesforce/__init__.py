@@ -32,11 +32,13 @@ CONFIG = {
 
 def main_impl():
     args = singer_utils.parse_args(REQUIRED_CONFIG_KEYS)
+    is_sandbox = args.config.get("is_sandbox", False)
 
     sf = Salesforce(
         refresh_token=args.config["refresh_token"],
         client_id=args.config["client_id"],
         client_secret=args.config["client_secret"],
+        is_sandbox=is_sandbox,
     )
 
     start_date_conf = args.config["start_date"]
@@ -61,7 +63,10 @@ def main_impl():
             for field in table.fields:
                 stream.write_record(field, stream_id)
 
-        if table.name == "Case" and sf.instance_url != "https://parloagmbh.my.salesforce.com":
+        if (
+            table.name == "Case"
+            and sf.instance_url != "https://parloagmbh.my.salesforce.com"
+        ):
             continue
 
         LOGGER.info(f"processing stream {table.name}")
