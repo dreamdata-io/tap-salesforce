@@ -169,6 +169,11 @@ class Salesforce:
                 replication_key="SystemModstamp",
                 primary_key="Id",
             ),
+            Table(
+                name="Engagement__c",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+            ),
         ]
 
         selected_tables = free_tables.copy()
