@@ -169,10 +169,12 @@ class Salesforce:
                 replication_key="SystemModstamp",
                 primary_key="Id",
             ),
+            # Custom object for slug: gopigment_com
             Table(
                 name="Engagement__c",
                 replication_key="SystemModstamp",
                 primary_key="Id",
+                should_sync_fields=True
             ),
         ]
 
