@@ -173,15 +173,22 @@ class Salesforce:
                 name="CurrencyType",
                 replication_key="SystemModstamp",
                 primary_key="Id",
-                should_sync_fields=True
+                should_sync_fields=True,
             ),
             # Custom object for slug: gopigment_com
             Table(
                 name="Engagement__c",
                 replication_key="SystemModstamp",
                 primary_key="Id",
-                should_sync_fields=True
-            ),  
+                should_sync_fields=True,
+            ),
+            # Custom object for slug: finastra_com
+            Table(
+                name="Opportunity_By_BU__c",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
         ]
 
         selected_tables = free_tables.copy()
