@@ -130,6 +130,7 @@ class Salesforce:
             Table(
                 name="Campaign",
                 replication_key="SystemModstamp",
+                primary_key="Id",
                 should_sync_fields=True,
             ),
             Table(name="AccountContactRelation", replication_key="SystemModstamp"),
