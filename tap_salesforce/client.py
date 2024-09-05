@@ -239,7 +239,7 @@ class Salesforce:
         from_stm = f"FROM {table.name} "
 
         if not end_date:
-            end_date = datetime.utcnow()
+            end_date = datetime.now()
 
         if replication_key is not None:
             where_stm = f"WHERE {replication_key} >= {start_date.strftime('%Y-%m-%dT%H:%M:%SZ')} "
@@ -390,7 +390,7 @@ class Salesforce:
         on_backoff=log_backoff_attempt,
     )
     def _make_request(self, method, path, data=None, params=None) -> requests.Response:
-        now = datetime.utcnow()
+        now = datetime.now()
 
         if self._token_expiration_time is None or self._token_expiration_time < now:
             self._login()
@@ -442,7 +442,7 @@ class Salesforce:
 
             self._access_token = auth["access_token"]
             self.instance_url = auth["instance_url"]
-            self._token_expiration_time = datetime.utcnow() + timedelta(
+            self._token_expiration_time = datetime.now() + timedelta(
                 seconds=self._REFRESH_TOKEN_EXPIRATION_PERIOD
             )
         except requests.exceptions.HTTPError as req_ex:

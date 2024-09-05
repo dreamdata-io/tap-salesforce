@@ -35,7 +35,7 @@ class Metrics:
     def gauge(self, value: Any):
         self.value = value
 
-        now = datetime.utcnow()
+        now = datetime.now()
 
         if self._last_sample is None:
             self._last_sample = now

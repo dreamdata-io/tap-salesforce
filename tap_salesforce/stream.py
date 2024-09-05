@@ -1,7 +1,7 @@
 import sys
 import json
 import base64
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TextIO, Dict, Optional
 
 from tap_salesforce.state import State
@@ -62,7 +62,7 @@ class Stream:
             dict(
                 type="RECORD",
                 stream=stream_id,
-                time_extracted=datetime.utcnow().isoformat() + "Z",
+                time_extracted=datetime.now(timezone.utc).isoformat() + "Z",
                 record=record,
             ),
             file=file,

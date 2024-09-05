@@ -46,7 +46,7 @@ def main_impl():
     config_start = singer_utils.strptime_with_tz(start_date_conf).astimezone(
         timezone.utc
     )
-    end_time = datetime.utcnow().astimezone(timezone.utc)
+    end_time = datetime.now(timezone.utc)
 
     stream = Stream(args.state)
 
