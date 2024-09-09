@@ -190,6 +190,20 @@ class Salesforce:
                 primary_key="Id",
                 should_sync_fields=True,
             ),
+            # Custom object for slug: wunderkind_co
+            Table(
+                name="Field_Reports__c",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            # Custom object for slug: cognism_com
+            Table(
+                name="Organisation__c",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
         ]
 
         selected_tables = free_tables.copy()
