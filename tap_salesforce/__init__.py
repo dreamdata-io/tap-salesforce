@@ -123,6 +123,7 @@ def sync(
     limit: Optional[int] = None,
 ):
     attempt = 0
+    state_value = start_time
     while True:
         try:
             for record in sf.get_records(
@@ -133,12 +134,11 @@ def sync(
                 limit=limit,
             ):
 
+                state_value = datetime.strptime(record[table.replication_key], "%Y-%m-%dT%H:%M:%S.%f%z")
+
                 stream.write_record(record, table.name)
-                state_value = datetime.strptime(
-                    record[table.replication_key], "%Y-%m-%dT%H:%M:%S.%f%z"
-                )
                 stream.set_stream_state(table.name, table.replication_key, state_value)
-            break
+            return
         except PrimaryKeyNotMatch:
             attempt += 1
             if attempt <= 5:

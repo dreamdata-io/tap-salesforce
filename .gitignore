@@ -101,6 +101,7 @@ config.json
 Pipfile*
 catalog.json
 .vscode/
+.idea*
 *.ndjson
 config.json
 poetry.lock
