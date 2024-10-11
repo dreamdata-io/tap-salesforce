@@ -51,7 +51,8 @@ def main_impl():
     stream = Stream(args.state)
 
     advanced_features_enabled = args.config.pop("advanced_features_enabled", False)
-    for table in sf.get_tables(advanced_features_enabled):
+    custom_objects = args.config.pop("custom_objects", [])
+    for table in sf.get_tables(advanced_features_enabled, custom_objects):
         if not table.fields:
             LOGGER.info(
                 f"skipping stream {table.name} since it does not exist on this account"
