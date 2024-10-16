@@ -91,7 +91,7 @@ class Salesforce:
 
         self._login()
 
-    def get_tables(self, advanced_features_enabled=False) -> Iterator[Table]:
+    def get_tables(self, advanced_features_enabled=False, custom_objects=[]) -> Iterator[Table]:
         """returns the supported table names, as well as the replication_key"""
         free_tables = [
             Table(
@@ -190,13 +190,13 @@ class Salesforce:
                 primary_key="Id",
                 should_sync_fields=True,
             ),
-            # Custom object for slug: wunderkind_co
-            Table(
-                name="Field_Reports__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
+            # # Custom object for slug: wunderkind_co
+            # Table(
+            #     name="Field_Reports__c",
+            #     replication_key="SystemModstamp",
+            #     primary_key="Id",
+            #     should_sync_fields=True,
+            # ),
             # Custom object for slug: cognism_com
             Table(
                 name="Organisation__c",
@@ -210,6 +210,16 @@ class Salesforce:
         if advanced_features_enabled:
             LOGGER.info("advanced features enabled for account")
             selected_tables.extend(advanced_tables)
+        if not custom_objects:
+            LOGGER.info("custom objects enabled for account")
+            selected_tables.extend([
+                Table(
+                    name=custom_object["objectName"],
+                    replication_key="SystemModstamp",
+                    primary_key="Id",
+                    should_sync_fields=True,
+                ) for custom_object in custom_objects
+            ])
 
         for table in selected_tables:
             try:
