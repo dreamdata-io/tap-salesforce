@@ -210,7 +210,7 @@ class Salesforce:
         if advanced_features_enabled:
             LOGGER.info("advanced features enabled for account")
             selected_tables.extend(advanced_tables)
-        if not custom_objects:
+        if custom_objects:
             LOGGER.info("custom objects enabled for account")
             selected_tables.extend([
                 Table(
