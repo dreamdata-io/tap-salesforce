@@ -159,51 +159,13 @@ class Salesforce:
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
             Table(name="Product2", replication_key="SystemModstamp"),
             Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
-            Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
-            Table(
-                name="TrulyActivity__Truly_Activity__c",
-                replication_key="SystemModstamp",
-            ),
             Table(name="Case", replication_key="SystemModstamp", primary_key="Id"),
             Table(
-                name="Task_Milestone__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-            ),
-            Table(
-                name="CurrencyType",
+                name="CurrencyType  ",
                 replication_key="SystemModstamp",
                 primary_key="Id",
                 should_sync_fields=True,
-            ),
-            # Custom object for slug: gopigment_com
-            Table(
-                name="Engagement__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
-            # Custom object for slug: finastra_com
-            Table(
-                name="Opportunity_By_BU__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
-            # # Custom object for slug: wunderkind_co
-            # Table(
-            #     name="Field_Reports__c",
-            #     replication_key="SystemModstamp",
-            #     primary_key="Id",
-            #     should_sync_fields=True,
-            # ),
-            # Custom object for slug: cognism_com
-            Table(
-                name="Organisation__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
+            )
         ]
 
         selected_tables = free_tables.copy()
