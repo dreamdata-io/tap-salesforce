@@ -11,10 +11,12 @@ setup(
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_salesforce"],
     install_requires=[
-        "requests==2.22.0",
+        "requests==2.32.0",
         "singer-python==5.8.1",
-        "pydantic==1.8.2",
+        "pydantic==2.4.0",
         "backoff==1.8.0",
+        "simplejson",
+        "singer",
     ],
     entry_points="""
           [console_scripts]
