@@ -36,6 +36,8 @@ class SalesforceException(Exception):
         super().__init__(message)
         self.code = code
 
+    def __str__(self) -> str:
+        return f'{self.code}: {super().__str__()}'
 
 # build_salesforce_exception transforms a generic Response into a SalesforceException if the
 # response body has a salesforce exception, returns None otherwise

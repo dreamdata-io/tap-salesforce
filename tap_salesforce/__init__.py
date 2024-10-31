@@ -13,6 +13,7 @@ import requests
 from tap_salesforce.stream import Stream
 from tap_salesforce.client import Salesforce, Table, PrimaryKeyNotMatch
 from tap_salesforce.exceptions import (
+    build_salesforce_exception,
     TapSalesforceException,
     TapSalesforceQuotaExceededException,
     TapSalesforceInvalidCredentialsException,
@@ -102,10 +103,10 @@ def main_impl():
             url = err.request.url
             method = err.request.method
             if err.response is not None:
-                status_code, message, errorCode = parse_exception(err.response)
+                salesforce_exception = build_salesforce_exception(err.response)
                 status_code = err.response.status_code
                 LOGGER.exception(
-                    f"{method}: {url}\n{status_code}: {message} => {errorCode}"
+                    f"{method}: {url}\n{status_code}: {str(salesforce_exception)}"
                 )
             else:
                 LOGGER.exception(f"{method}: {url} => {str(err)}")
