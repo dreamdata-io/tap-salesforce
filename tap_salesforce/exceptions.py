@@ -2,7 +2,13 @@
 
 
 from typing import Optional
+
+import simplejson
+import singer
 from requests import Response
+
+
+LOGGER = singer.get_logger()
 
 
 class TapSalesforceException(Exception):
@@ -41,7 +47,12 @@ class SalesforceException(Exception):
 #   }
 # ]
 def build_salesforce_exception(resp: Response) -> Optional[SalesforceException]:
-    err_array = resp.json()
+    try:
+        err_array = resp.json()
+    except simplejson.scanner.JSONDecodeError:
+        LOGGER.error(f"Failed to parse response body: {resp.text}")
+        return SalesforceException("response code: " + str(resp.status_code), "UNKNOWN")
+
     if not isinstance(err_array, list):
         return None
 
