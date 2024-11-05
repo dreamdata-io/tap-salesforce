@@ -70,7 +70,6 @@ class SalesforceQueryTimeoutException(SalesforceException):
         super().__init__(message, "QUERY_TIMEOUT")
 
 
-
 # build_salesforce_exception transforms a generic Response into a SalesforceException if the
 # response body has a salesforce exception, returns None otherwise
 # salesforce error body looks like:
