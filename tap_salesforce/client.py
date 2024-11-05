@@ -10,6 +10,10 @@ import requests
 
 from tap_salesforce.exceptions import (
     SalesforceException,
+    SalesforceFunctionalityTemporarilyUnavailableException,
+    SalesforceUnexpectedException,
+    SalesforceQueryTimeoutException,
+    SalesforceSessionExpiredException,
     TapSalesforceOauthException,
     TapSalesforceQuotaExceededException,
     TapSalesforceInvalidCredentialsException,
@@ -413,6 +417,10 @@ class Salesforce:
             requests.exceptions.Timeout,
             requests.exceptions.ChunkedEncodingError,
             requests.exceptions.HTTPError,
+            SalesforceFunctionalityTemporarilyUnavailableException,
+            SalesforceUnexpectedException,
+            SalesforceSessionExpiredException,
+            SalesforceQueryTimeoutException,
         ),
         max_tries=5,
         factor=2,
