@@ -50,6 +50,69 @@ class PrimaryKeyNotMatch(Exception):
     pass
 
 
+LEGACY_CUSTOMER_OBJECTS = {
+    "https://imanage.my.salesforce.com": [Table(name="OpportunityLineItem")],
+    "https://leica.my.salesforce.com": [
+        Table(name="OpportunityLineItem"),
+        Table(
+            name="CurrencyType",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+            should_sync_fields=True,
+        ),
+    ],
+    "https://parloagmbh.my.salesforce.com": [
+        Table(name="Case", replication_key="SystemModstamp", primary_key="Id"),
+    ],
+    "https://superside.my.salesforce.com": [
+        Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
+        Table(
+            name="TrulyActivity__Truly_Activity__c",
+            replication_key="SystemModstamp",
+        ),
+    ],
+    "https://rwsholdings.my.salesforce.com": [
+        Table(
+            name="Task_Milestone__c",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+        )
+    ],
+    "https://pigment.my.salesforce.com": [
+        Table(
+            name="Engagement__c",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+            should_sync_fields=True,
+        )
+    ],
+    "https://misys.my.salesforce.com": [
+        Table(
+            name="Opportunity_By_BU__c",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+            should_sync_fields=True,
+        )
+    ],
+    "https://wunderkind.my.salesforce.com": [
+        Table(
+            name="Field_Reports__c",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+            should_sync_fields=True,
+        )
+    ],
+    "https://cognism.my.salesforce.com": [
+        Table(
+            name="Organisation__c",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+            should_sync_fields=True,
+        )
+    ],
+}
+
+
 class Salesforce:
     client_id: str
     client_secret: str
@@ -152,27 +215,6 @@ class Salesforce:
                 name="Event", replication_key="SystemModstamp", should_sync_fields=True
             ),
             Table(name="RecordType", replication_key="SystemModstamp"),
-            Table(name="Product2", replication_key="SystemModstamp"),
-            Table(name="OpportunityLineItem", replication_key="SystemModstamp"),
-            Table(name="Case", replication_key="SystemModstamp", primary_key="Id"),
-            Table(
-                name="CurrencyType",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
-            Table(name="Revenue_Lifecycle__c", replication_key="SystemModstamp"),
-            Table(
-                name="Task_Milestone__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-            ),
-            Table(
-                name="TrulyActivity__Truly_Activity__c",
-                replication_key="SystemModstamp",
-            ),
-            Table(name="Invoice__c", replication_key="SystemModstamp"),
-            Table(name="Trial__c", replication_key="SystemModstamp"),
             # History objects
             Table(name="AccountHistory", replication_key="CreatedDate"),
             Table(
@@ -183,34 +225,6 @@ class Salesforce:
             Table(name="LeadHistory", replication_key="CreatedDate"),
             Table(name="OpportunityHistory", replication_key="CreatedDate"),
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
-            # Custom object for slug: gopigment_com
-            Table(
-                name="Engagement__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
-            # Custom object for slug: finastra_com
-            Table(
-                name="Opportunity_By_BU__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
-            # Custom object for slug: wunderkind_co
-            Table(
-                name="Field_Reports__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
-            # Custom object for slug: cognism_com
-            Table(
-                name="Organisation__c",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
         ]
 
         selected_tables = free_tables.copy()
@@ -230,6 +244,8 @@ class Salesforce:
                     for custom_object in custom_objects
                 ]
             )
+        if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
+            selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
 
         for table in selected_tables:
             try:

@@ -65,12 +65,6 @@ def main_impl():
             for field in table.fields:
                 stream.write_record(field, stream_id)
 
-        if (
-            table.name == "Case"
-            and sf.instance_url != "https://parloagmbh.my.salesforce.com"
-        ):
-            continue
-
         LOGGER.info(f"processing stream {table.name}")
 
         start_time = (
@@ -136,12 +130,14 @@ def sync(
                 limit=limit,
             ):
 
-                state_value = datetime.strptime(
-                    record[table.replication_key], "%Y-%m-%dT%H:%M:%S.%f%z"
-                )
-
                 stream.write_record(record, table.name)
-                stream.set_stream_state(table.name, table.replication_key, state_value)
+                if table.replication_key:
+                    state_value = datetime.strptime(
+                        record[table.replication_key], "%Y-%m-%dT%H:%M:%S.%f%z"
+                    )
+                    stream.set_stream_state(
+                        table.name, table.replication_key, state_value
+                    )
             return
         except PrimaryKeyNotMatch:
             attempt += 1
