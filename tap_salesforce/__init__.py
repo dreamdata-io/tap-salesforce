@@ -65,12 +65,6 @@ def main_impl():
             for field in table.fields:
                 stream.write_record(field, stream_id)
 
-        if (
-            table.name == "Case"
-            and sf.instance_url != "https://parloagmbh.my.salesforce.com"
-        ):
-            continue
-
         LOGGER.info(f"processing stream {table.name}")
 
         start_time = (
