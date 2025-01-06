@@ -136,12 +136,14 @@ def sync(
                 limit=limit,
             ):
 
-                state_value = datetime.strptime(
-                    record[table.replication_key], "%Y-%m-%dT%H:%M:%S.%f%z"
-                )
-
                 stream.write_record(record, table.name)
-                stream.set_stream_state(table.name, table.replication_key, state_value)
+                if table.replication_key:
+                    state_value = datetime.strptime(
+                        record[table.replication_key], "%Y-%m-%dT%H:%M:%S.%f%z"
+                    )
+                    stream.set_stream_state(
+                        table.name, table.replication_key, state_value
+                    )
             return
         except PrimaryKeyNotMatch:
             attempt += 1
