@@ -296,6 +296,8 @@ class Salesforce:
             where_stm += (
                 f" AND {replication_key} < {end_date.strftime('%Y-%m-%dT%H:%M:%SZ')} "
             )
+            if self.instance_url == "https://squareinc--sqdev.sandbox.my.salesforce.com" and table.name == "Account":
+                where_stm += f" AND Business_Unit__c = 'Afterpay' "
             order_by_stm = f"ORDER BY {replication_key} ASC "
             if primary_key:
                 order_by_stm += f",{primary_key} ASC"
