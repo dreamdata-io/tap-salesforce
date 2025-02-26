@@ -47,8 +47,8 @@ class Stream:
         else:
             self._state = State()
 
-    def set_stream_state(self, stream_id: str, replication_key: str, value: datetime):
-        self._state.set_stream_state(stream_id, replication_key, value)
+    def set_stream_state(self, stream_id: str, key: str, value: any):
+        self._state.set_stream_state(stream_id, key, value)
 
     def get_stream_state(self, stream_id: str, replication_key) -> Optional[datetime]:
         return self._state.get_stream_state(stream_id, replication_key)

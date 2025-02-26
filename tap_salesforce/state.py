@@ -7,8 +7,14 @@ from pydantic import BaseModel
 class State(BaseModel):
     bookmarks: Dict[str, Dict] = {}
 
-    def set_stream_state(self, stream_id: str, replication_key: str, value: datetime):
-        self.bookmarks[stream_id] = {replication_key: value.isoformat() + "Z"}
+    def set_stream_state(self, stream_id: str, key: str, value: any):
+
+        state = self.bookmarks.get(stream_id, dict())
+        if type(value) == datetime:
+            state[key] = value.isoformat() + "Z"
+        else:
+            state[key] = value
+        self.bookmarks[stream_id] = state
 
     def get_stream_state(
         self, stream_id: str, replication_key: str

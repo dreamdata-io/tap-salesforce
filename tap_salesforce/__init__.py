@@ -22,6 +22,7 @@ from tap_salesforce.exceptions import (
 LOGGER = singer.get_logger()
 
 REQUIRED_CONFIG_KEYS = ["refresh_token", "client_id", "client_secret", "start_date"]
+FOUR_YEARS_AGO = (datetime.now(timezone.utc) - timedelta(days=4 * 365)).date()
 
 CONFIG = {
     "refresh_token": None,
@@ -29,6 +30,12 @@ CONFIG = {
     "client_secret": None,
     "start_date": None,
 }
+
+
+class Replication:
+    key = "replication_method"
+    full_table = "FULL_TABLE"  # means we replace all records in the table
+    incremental = "INCREMENTAL"  # means we append new records to the table
 
 
 def main_impl():
@@ -70,6 +77,9 @@ def main_impl():
         start_time = (
             stream.get_stream_state(table.name, table.replication_key) or config_start
         )
+        resync = table.should_resync_all_historical_data()
+        if resync:
+            start_time = FOUR_YEARS_AGO
 
         field_names = [field["name"] for field in table.fields]
         try:
@@ -92,6 +102,10 @@ def main_impl():
                     previous_datetime = time_interval
             else:
                 sync(sf, stream, table, field_names, start_time, end_time)
+                if resync:
+                    stream.set_stream_state(
+                        table.name, Replication.key, Replication.full_table
+                    )
         except requests.exceptions.HTTPError as err:
 
             url = err.request.url
