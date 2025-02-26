@@ -106,6 +106,10 @@ def main_impl():
                     stream.set_stream_state(
                         table.name, Replication.key, Replication.full_table
                     )
+                else:
+                    stream.set_stream_state(
+                        table.name, Replication.key, Replication.incremental
+                    )
         except requests.exceptions.HTTPError as err:
 
             url = err.request.url
