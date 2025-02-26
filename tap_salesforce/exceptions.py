@@ -37,35 +37,30 @@ class SalesforceException(Exception):
         self.code = code
 
     def __str__(self) -> str:
-        return f'{self.code}: {super().__str__()}'
+        return f"{self.code}: {super().__str__()}"
 
 
 class SalesforceFunctionalityTemporarilyUnavailableException(SalesforceException):
-
     def __init__(self, message: str) -> None:
         super().__init__(message, "FUNCTIONALITY_TEMPORARILY_UNAVAILABLE")
 
 
 class SalesforceAPIDisabledForOrganizationException(SalesforceException):
-
     def __init__(self, message: str) -> None:
         super().__init__(message, "API_DISABLED_FOR_ORG")
 
 
 class SalesforceSessionExpiredException(SalesforceException):
-
     def __init__(self, message: str) -> None:
         super().__init__(message, "SESSION_EXPIRED")
 
 
 class SalesforceUnexpectedException(SalesforceException):
-
     def __init__(self, message: str) -> None:
         super().__init__(message, "UNEXPECTED")
 
 
 class SalesforceQueryTimeoutException(SalesforceException):
-
     def __init__(self, message: str) -> None:
         super().__init__(message, "QUERY_TIMEOUT")
 
