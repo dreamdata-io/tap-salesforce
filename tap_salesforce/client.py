@@ -49,7 +49,7 @@ class Table(BaseModel):
         # when a customer delete a campaign member record in Salesforce, we can not get that record again with isDeleted=true
         # so we need to resync all historical data every Saturday to avoid having data inconsistency
         # but we can not resync all historical data for each sync because it will take too much quota
-        if self.name in ["CampaignMember",] and (
+        if self.name in ["CampaignMember"] and (
             datetime.now().weekday() == 5
         ):  # Saturday
             return True
