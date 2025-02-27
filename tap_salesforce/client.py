@@ -45,6 +45,16 @@ class Table(BaseModel):
     def set_fields(self, fields: List[str]):
         self.fields = fields
 
+    def should_resync_all_historical_data(self):
+        # when a customer delete a campaign member record in Salesforce, we can not get that record again with isDeleted=true
+        # so we need to resync all historical data every Saturday to avoid having data inconsistency
+        # but we can not resync all historical data for each sync because it will take too much quota
+        if self.name in ["CampaignMember"] and (
+            datetime.now().weekday() == 5
+        ):  # Saturday
+            return True
+        return False
+
 
 class PrimaryKeyNotMatch(Exception):
     pass
@@ -296,7 +306,11 @@ class Salesforce:
             where_stm += (
                 f" AND {replication_key} < {end_date.strftime('%Y-%m-%dT%H:%M:%SZ')} "
             )
-            if self.instance_url == "https://squareinc--sqdev.sandbox.my.salesforce.com" and table.name == "Account":
+            if (
+                self.instance_url
+                == "https://squareinc--sqdev.sandbox.my.salesforce.com"
+                and table.name == "Account"
+            ):
                 where_stm += f" AND Business_Unit__c = 'Afterpay' "
             order_by_stm = f"ORDER BY {replication_key} ASC "
             if primary_key:
