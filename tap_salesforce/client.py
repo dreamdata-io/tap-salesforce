@@ -120,6 +120,14 @@ LEGACY_CUSTOMER_OBJECTS = {
             should_sync_fields=True,
         )
     ],
+    "https://accessgroup.my.salesforce.com": [
+        Table(
+            name="OpportunityLineItem",
+            replication_key="SystemModstamp",
+            primary_key="Id",
+            should_sync_fields=True,
+        )
+    ],
 }
 
 
