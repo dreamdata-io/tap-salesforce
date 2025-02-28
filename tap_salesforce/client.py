@@ -53,6 +53,8 @@ class Table(BaseModel):
             datetime.now().weekday() == 5
         ):  # Saturday
             return True
+        if self.name in ["OpportunityLineItem"]:
+            return True
         return False
 
 
