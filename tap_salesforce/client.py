@@ -308,9 +308,9 @@ class Salesforce:
             if (
                 self.instance_url
                 == "https://squareinc--sqdev.sandbox.my.salesforce.com"
-                and table.name == "Account"
+                and (table.name == "Account" or table.name == "Contact" or table.name == "Lead")
             ):
-                where_stm += f" AND Business_Unit__c = 'Afterpay' "
+                where_stm += f" AND (Business_Unit__c INCLUDES ('Afterpay') OR Business_Unit__c INCLUDES ('afterpay')) "
             order_by_stm = f"ORDER BY {replication_key} ASC "
             if primary_key:
                 order_by_stm += f",{primary_key} ASC"
