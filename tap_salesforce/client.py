@@ -209,8 +209,6 @@ class Salesforce:
                 primary_key="Id",
                 should_sync_fields=True,
             ),
-            Table(name="AccountContactRelation", replication_key="SystemModstamp"),
-            Table(name="AccountContactRole", replication_key="SystemModstamp"),
             Table(name="OpportunityContactRole", replication_key="SystemModstamp"),
             Table(
                 name="CampaignMember",
@@ -235,7 +233,6 @@ class Salesforce:
                 apply_weekly_rule=True,
             ),
             Table(name="LeadHistory", replication_key="CreatedDate"),
-            Table(name="OpportunityHistory", replication_key="CreatedDate"),
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
         ]
 
