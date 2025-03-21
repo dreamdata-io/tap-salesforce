@@ -255,6 +255,16 @@ class Salesforce:
             )
         if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
             selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
+        
+        selected_tables = [table for table in selected_tables if table.name != "Opportunity"]
+        selected_tables.append(
+            Table(
+                name="Opportunity",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            )
+        )
 
         for table in selected_tables:
             try:
@@ -308,7 +318,7 @@ class Salesforce:
             if (
                 self.instance_url
                 == "https://squareinc.my.salesforce.com"
-                and table.name in ["Account", "Contact", "Lead"]
+                and table.name in ["Account", "Contact", "Lead", "Opportunity"]
             ):
                 where_stm += f" AND (Business_Unit__c INCLUDES ('Afterpay') OR Business_Unit__c INCLUDES ('afterpay')) "
             order_by_stm = f"ORDER BY {replication_key} ASC "
