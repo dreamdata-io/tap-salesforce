@@ -121,7 +121,7 @@ LEGACY_CUSTOMER_OBJECTS = {
             primary_key="Id",
             should_sync_fields=True,
         )
-    ]
+    ],
 }
 
 
@@ -255,8 +255,10 @@ class Salesforce:
             )
         if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
             selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
-        
-        selected_tables = [table for table in selected_tables if table.name != "Opportunity"]
+
+        selected_tables = [
+            table for table in selected_tables if table.name != "Opportunity"
+        ]
         selected_tables.append(
             Table(
                 name="Opportunity",
@@ -316,11 +318,16 @@ class Salesforce:
                 f" AND {replication_key} < {end_date.strftime('%Y-%m-%dT%H:%M:%SZ')} "
             )
             if (
-                self.instance_url
-                == "https://squareinc.my.salesforce.com"
-                and table.name in ["Account", "Contact", "Lead", "Opportunity"]
+                self.instance_url == "https://squareinc.my.salesforce.com"
+                and table.name in ["Account", "Contact", "Lead"]
             ):
-                where_stm += f" AND (Business_Unit__c INCLUDES ('Afterpay') OR Business_Unit__c INCLUDES ('afterpay')) "
+                where_stm += f" AND (Business_Unit__c IN ('Afterpay','afterpay')) "
+            elif (
+                self.instance_url == "https://squareinc.my.salesforce.com"
+                and table.name in ["Opportunity"]
+            ):
+                where_stm += f" AND (Opportunity_Record_Type_Name__c IN ('AP Global SMB','AP Global Enterprise')) "
+
             order_by_stm = f"ORDER BY {replication_key} ASC "
             if primary_key:
                 order_by_stm += f",{primary_key} ASC"
