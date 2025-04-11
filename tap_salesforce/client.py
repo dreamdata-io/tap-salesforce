@@ -122,6 +122,9 @@ LEGACY_CUSTOMER_OBJECTS = {
             should_sync_fields=True,
         )
     ],
+    "https://woodmac.my.salesforce.com": [
+        Table(name="OpportunityLineItem", should_sync_fields=True)
+    ],
 }
 
 
