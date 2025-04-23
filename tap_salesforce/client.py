@@ -237,6 +237,7 @@ class Salesforce:
             ),
             Table(name="LeadHistory", replication_key="CreatedDate"),
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
+            Table(name="AccountContactRelation", replication_key="CreatedDate"),
         ]
 
         selected_tables = free_tables.copy()
