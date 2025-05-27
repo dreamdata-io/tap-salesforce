@@ -369,14 +369,12 @@ class Salesforce:
                 if not primary_key:
                     primary_key = record[table.primary_key]
                 if primary_key != record[table.primary_key]:
-                    LOGGER.warning(
-                        f"Skipping record due to mismatched primary keys: {primary_key} and {record[table.primary_key]}"
+                    raise PrimaryKeyNotMatch(
+                        f"couldn't merge records with different primary keys: {primary_key} and {record[table.primary_key]}"
                     )
-                    continue
                 merged_record.update(record)
 
-            if merged_record:
-                yield merged_record
+            yield merged_record
 
     def get_records(
         self,
