@@ -376,6 +376,13 @@ class Salesforce:
 
             yield merged_record
 
+    @backoff.on_exception(
+        backoff.expo,
+        (PrimaryKeyNotMatch),
+        max_tries=5,
+        factor=2,
+        on_backoff=log_backoff_attempt,
+    )
     def get_records(
         self,
         table: Table,
