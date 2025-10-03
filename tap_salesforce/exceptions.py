@@ -138,13 +138,3 @@ def build_salesforce_exception(resp: Response) -> Optional[SalesforceException]:
         return SalesforceQueryTimeoutException(msg)
 
     return SalesforceException(msg, code)
-
-
-if __name__ == '__main__':
-    x = TapSalesforceMissingTablesException(['a', 'b', 'c'])
-    print(x)
-    y = TapSalesforceReportException(x, ValueError("bad value"))
-    print(y)
-    y.add(KeyError("missing key"))
-    print(y)
-    raise x
