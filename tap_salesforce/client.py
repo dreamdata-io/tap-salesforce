@@ -41,6 +41,7 @@ class Table(BaseModel):
     fields: Optional[List[str]]
     should_sync_fields: Optional[bool] = False
     apply_weekly_rule: Optional[bool] = False
+    not_found: Optional[bool] = False
 
     def set_fields(self, fields: List[str]):
         self.fields = fields
@@ -279,9 +280,10 @@ class Salesforce:
                 yield table
             except SalesforceException as e:
                 if e.code == "NOT_FOUND":
-                    LOGGER.info(f"table '{table}' not found, skipping")
-                    continue
-                raise e
+                    table.not_found = True
+                    yield table
+                else:
+                    raise e
 
     def describe(self, table: str) -> Dict:
         try:

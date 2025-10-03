@@ -1,7 +1,6 @@
 # pylint: disable=super-init-not-called
-
-
-from typing import Optional
+import json
+from typing import Optional, List, Tuple
 
 import simplejson
 import singer
@@ -29,6 +28,31 @@ class TapSalesforceOauthException(TapSalesforceException):
 
 class TapSalesforceInvalidCredentialsException(TapSalesforceException):
     pass
+
+
+class TapSalesforceMissingTablesException(TapSalesforceException):
+    tables : List[str] = []
+
+    def __init__(self, tables: List[str]) -> None:
+        self.tables = tables
+        super().__init__(self.__str__())
+
+    def __str__(self) -> str:
+        return "Missing required tables: " + ", ".join(self.tables)
+
+
+class TapSalesforceReportException(TapSalesforceException):
+    exceptions : List[Exception] = []
+
+    def __init__(self, *exceptions: Exception) -> None:
+        self.exceptions = list(exceptions)
+        super().__init__(self.__str__())
+
+    def __str__(self) -> str:
+        return json.dumps([{"type": type(e).__name__, "exception": str(e)} for e in self.exceptions])
+
+    def add(self, exception: Exception) -> None:
+        self.exceptions.append(exception)
 
 
 class SalesforceException(Exception):
