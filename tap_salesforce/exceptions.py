@@ -38,7 +38,7 @@ class TapSalesforceMissingTablesException(TapSalesforceException):
         super().__init__(self.__str__())
 
     def __str__(self) -> str:
-        return "Missing required tables: " + ", ".join(self.tables)
+        return "Account is missing access to objects: " + ", ".join(self.tables)
 
 
 class TapSalesforceReportException(TapSalesforceException):
@@ -138,3 +138,13 @@ def build_salesforce_exception(resp: Response) -> Optional[SalesforceException]:
         return SalesforceQueryTimeoutException(msg)
 
     return SalesforceException(msg, code)
+
+
+if __name__ == '__main__':
+    x = TapSalesforceMissingTablesException(['a', 'b', 'c'])
+    print(x)
+    y = TapSalesforceReportException(x, ValueError("bad value"))
+    print(y)
+    y.add(KeyError("missing key"))
+    print(y)
+    raise x
