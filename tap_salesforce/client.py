@@ -289,7 +289,33 @@ class Salesforce:
                 "GET", f"/services/data/{self._API_VERSION}/sobjects/{table}/describe/"
             )
 
-            return resp.json()
+            describe_data = resp.json()
+            try:
+                # enrich with the description from the Tooling API
+                tooling_query = f"SELECT QualifiedApiName, Description FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{table}'"
+                tooling_resp = self._make_request(
+                    "GET",
+                    f"/services/data/{self._API_VERSION}/tooling/query/",
+                    params={"q": tooling_query},
+                )
+                tooling_data = tooling_resp.json()
+                description_map = {
+                        record["QualifiedApiName"]: record.get("Description")
+                        for record in tooling_data.get("records", [])
+                    }
+                for field in describe_data.get("fields", []):
+                    if field["name"] in description_map:
+                        field["description"] = description_map[field["name"]]
+                    else:
+                        field["description"] = None
+                return describe_data
+            except Exception as e:
+                LOGGER.warning(
+                    f"Could not enrich '{table}' with description from Tooling API. Error: {e}"
+                )
+                for field in describe_data.get("fields", []):
+                    field["description"] = None
+                return describe_data
         except requests.exceptions.HTTPError as err:
             if err.response is None:
                 raise
