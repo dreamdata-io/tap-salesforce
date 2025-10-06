@@ -17,6 +17,8 @@ from tap_salesforce.exceptions import (
     TapSalesforceException,
     TapSalesforceQuotaExceededException,
     TapSalesforceInvalidCredentialsException,
+    TapSalesforceMissingTablesException,
+    TapSalesforceReportException,
 )
 
 LOGGER = singer.get_logger()
@@ -60,71 +62,83 @@ def main_impl():
 
     advanced_features_enabled = args.config.pop("advanced_features_enabled", False)
     custom_objects = args.config.pop("custom_objects", [])
-    for table in sf.get_tables(advanced_features_enabled, custom_objects):
-        if not table.fields:
-            LOGGER.info(
-                f"skipping stream {table.name} since it does not exist on this account"
+    missing_tables = []
+    try:
+        for table in sf.get_tables(advanced_features_enabled, custom_objects):
+            if table.not_found:
+                missing_tables.append(table.name)
+                continue
+            if not table.fields:
+                LOGGER.info(f"skipping stream {table.name} since it does not exist on this account")
+                continue
+
+            if table.should_sync_fields:
+                stream_id = f"{table.name}Fields"
+                for field in table.fields:
+                    stream.write_record(field, stream_id)
+
+            LOGGER.info(f"processing stream {table.name}")
+
+            start_time = (
+                stream.get_stream_state(table.name, table.replication_key) or config_start
             )
-            continue
+            resync = table.should_resync_all_historical_data()
+            if resync:
+                start_time = FOUR_YEARS_AGO
 
-        if table.should_sync_fields:
-            stream_id = f"{table.name}Fields"
-            for field in table.fields:
-                stream.write_record(field, stream_id)
+            field_names = [field["name"] for field in table.fields]
+            try:
+                if table.apply_weekly_rule:
+                    previous_datetime = start_time
 
-        LOGGER.info(f"processing stream {table.name}")
+                    for time_interval in rrule(
+                        WEEKLY, dtstart=start_time, until=end_time + timedelta(days=7)
+                    ):
+                        if previous_datetime == time_interval:
+                            continue
+                        sync(
+                            sf,
+                            stream,
+                            table,
+                            field_names,
+                            start_time=previous_datetime,
+                            end_time=time_interval,
+                        )
+                        previous_datetime = time_interval
+                else:
+                    sync(sf, stream, table, field_names, start_time, end_time)
+                    if resync:
+                        stream.set_stream_state(
+                            table.name, Replication.key, Replication.full_table
+                        )
+                    else:
+                        stream.set_stream_state(
+                            table.name, Replication.key, Replication.incremental
+                        )
+            except requests.exceptions.HTTPError as err:
 
-        start_time = (
-            stream.get_stream_state(table.name, table.replication_key) or config_start
-        )
-        resync = table.should_resync_all_historical_data()
-        if resync:
-            start_time = FOUR_YEARS_AGO
-
-        field_names = [field["name"] for field in table.fields]
-        try:
-            if table.apply_weekly_rule:
-                previous_datetime = start_time
-
-                for time_interval in rrule(
-                    WEEKLY, dtstart=start_time, until=end_time + timedelta(days=7)
-                ):
-                    if previous_datetime == time_interval:
-                        continue
-                    sync(
-                        sf,
-                        stream,
-                        table,
-                        field_names,
-                        start_time=previous_datetime,
-                        end_time=time_interval,
-                    )
-                    previous_datetime = time_interval
-            else:
-                sync(sf, stream, table, field_names, start_time, end_time)
-                if resync:
-                    stream.set_stream_state(
-                        table.name, Replication.key, Replication.full_table
+                url = err.request.url
+                method = err.request.method
+                if err.response is not None:
+                    salesforce_exception = build_salesforce_exception(err.response)
+                    status_code = err.response.status_code
+                    LOGGER.exception(
+                        f"{method}: {url}\n{status_code}: {str(salesforce_exception)}"
                     )
                 else:
-                    stream.set_stream_state(
-                        table.name, Replication.key, Replication.incremental
-                    )
-        except requests.exceptions.HTTPError as err:
-
-            url = err.request.url
-            method = err.request.method
-            if err.response is not None:
-                salesforce_exception = build_salesforce_exception(err.response)
-                status_code = err.response.status_code
-                LOGGER.exception(
-                    f"{method}: {url}\n{status_code}: {str(salesforce_exception)}"
-                )
-            else:
-                LOGGER.exception(f"{method}: {url} => {str(err)}")
-            raise
-        finally:
-            stream.write_state()
+                    LOGGER.exception(f"{method}: {url} => {str(err)}")
+                raise
+            finally:
+                stream.write_state()
+    except Exception as e:
+        stream.write_state()
+        if missing_tables:
+            raise TapSalesforceReportException(e, TapSalesforceMissingTablesException(missing_tables))
+        raise
+    finally:
+        # write the tables in json format
+        if missing_tables:
+            raise TapSalesforceMissingTablesException(missing_tables)
 
 
 def sync(
@@ -177,7 +191,6 @@ def parse_exception(resp: requests.Response) -> Tuple[int, str, str]:
 @singer_utils.handle_top_exception(LOGGER)
 def main():
     try:
-
         main_impl()
     except TapSalesforceQuotaExceededException as e:
         LOGGER.exception(str(e))
