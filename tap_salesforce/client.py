@@ -191,12 +191,6 @@ class Salesforce:
                 primary_key="Id",
                 should_sync_fields=True,
             ),
-            Table(
-                name="Opportunity",
-                replication_key="SystemModstamp",
-                primary_key="Id",
-                should_sync_fields=True,
-            ),
             Table(name="User", replication_key="SystemModstamp"),
         ]
 
@@ -238,7 +232,6 @@ class Salesforce:
             ),
             Table(name="LeadHistory", replication_key="CreatedDate"),
             Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
-            Table(name="AccountContactRelation", replication_key="SystemModstamp"),
         ]
 
         selected_tables = free_tables.copy()
@@ -261,9 +254,6 @@ class Salesforce:
         if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
             selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
 
-        selected_tables = [
-            table for table in selected_tables if table.name != "Opportunity"
-        ]
         selected_tables.append(
             Table(
                 name="Opportunity",
@@ -272,6 +262,11 @@ class Salesforce:
                 should_sync_fields=True,
             )
         )
+
+        if self.instance_url in ["https://criteo.my.salesforce.com"]:
+            selected_tables.append(
+                Table(name="AccountContactRelation", replication_key="SystemModstamp")
+            )
 
         for table in selected_tables:
             try:
@@ -302,9 +297,9 @@ class Salesforce:
                 )
                 tooling_data = tooling_resp.json()
                 description_map = {
-                        record["QualifiedApiName"]: record.get("Description")
-                        for record in tooling_data.get("records", [])
-                    }
+                    record["QualifiedApiName"]: record.get("Description")
+                    for record in tooling_data.get("records", [])
+                }
                 for field in describe_data.get("fields", []):
                     if field["name"] in description_map:
                         field["description"] = description_map[field["name"]]
