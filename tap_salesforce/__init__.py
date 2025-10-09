@@ -182,6 +182,7 @@ def sync(
         except PrimaryKeyNotMatch:
             attempt += 1
             if attempt <= 10:
+                start_time = state_value
                 LOGGER.info(f"retry {attempt} attempt start from {start_time}")
                 continue
             raise
