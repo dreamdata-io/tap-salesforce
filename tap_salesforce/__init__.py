@@ -56,7 +56,8 @@ def main_impl():
     config_start = singer_utils.strptime_with_tz(start_date_conf).astimezone(
         timezone.utc
     )
-    end_time = datetime.now(timezone.utc)
+    # to avoid sync data while customer updating them, we set the end_time to one hour ago
+    end_time = datetime.now(timezone.utc) - timedelta(hours=1)
 
     stream = Stream(args.state)
 
@@ -69,7 +70,9 @@ def main_impl():
                 missing_tables.append(table.name)
                 continue
             if not table.fields:
-                LOGGER.info(f"skipping stream {table.name} since it does not exist on this account")
+                LOGGER.info(
+                    f"skipping stream {table.name} since it does not exist on this account"
+                )
                 continue
 
             if table.should_sync_fields:
@@ -80,7 +83,8 @@ def main_impl():
             LOGGER.info(f"processing stream {table.name}")
 
             start_time = (
-                stream.get_stream_state(table.name, table.replication_key) or config_start
+                stream.get_stream_state(table.name, table.replication_key)
+                or config_start
             )
             resync = table.should_resync_all_historical_data()
             if resync:
@@ -94,6 +98,8 @@ def main_impl():
                     for time_interval in rrule(
                         WEEKLY, dtstart=start_time, until=end_time + timedelta(days=7)
                     ):
+                        if time_interval > end_time:
+                            time_interval = end_time
                         if previous_datetime == time_interval:
                             continue
                         sync(
@@ -133,7 +139,9 @@ def main_impl():
     except Exception as e:
         stream.write_state()
         if missing_tables:
-            raise TapSalesforceReportException(e, TapSalesforceMissingTablesException(missing_tables))
+            raise TapSalesforceReportException(
+                e, TapSalesforceMissingTablesException(missing_tables)
+            )
         raise
     finally:
         # write the tables in json format
@@ -173,9 +181,8 @@ def sync(
             return
         except PrimaryKeyNotMatch:
             attempt += 1
-            if attempt <= 5:
+            if attempt <= 10:
                 LOGGER.info(f"retry {attempt} attempt start from {start_time}")
-                start_time = state_value
                 continue
             raise
         finally:
