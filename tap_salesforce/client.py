@@ -591,6 +591,9 @@ class Salesforce:
         if match is None:
             return
 
+        if self.instance_url == "https://pulley.my.salesforce.com":
+            return
+
         used, total = map(int, match.groups())
 
         used_percent = (used / total) * 100.0
