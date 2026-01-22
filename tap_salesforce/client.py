@@ -605,6 +605,7 @@ class Salesforce:
         # - we want to make sure that if we run the tap multiple times,
         #   that we never spend more than 80% of the quota.
         if used_percent > self.quota_percent_total:
+            LOGGER.info(f"Quota usage exceeded for {self.instance_url}")
             raise TapSalesforceQuotaExceededException(
                 f"Salesforce Daily Quota Usage: {used_percent}% is above the configured limit of {self.quota_percent_total}% of total quota."
             )
