@@ -126,6 +126,12 @@ LEGACY_CUSTOMER_OBJECTS = {
     "https://woodmac.my.salesforce.com": [
         Table(name="OpportunityLineItem", should_sync_fields=True)
     ],
+    "https://criteo.my.salesforce.com": [
+        Table(name="AccountContactRelation", replication_key="SystemModstamp")
+    ],
+    "https://cepheid.my.salesforce.com": [
+        Table(name="Product2", replication_key="SystemModstamp")
+    ],
 }
 
 
@@ -263,10 +269,6 @@ class Salesforce:
             )
         )
 
-        if self.instance_url in ["https://criteo.my.salesforce.com"]:
-            selected_tables.append(
-                Table(name="AccountContactRelation", replication_key="SystemModstamp")
-            )
 
         for table in selected_tables:
             try:
