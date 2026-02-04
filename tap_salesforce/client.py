@@ -191,53 +191,53 @@ class Salesforce:
                 primary_key="Id",
                 should_sync_fields=True,
             ),
-            # Table(
-            #     name="Contact",
-            #     replication_key="SystemModstamp",
-            #     primary_key="Id",
-            #     should_sync_fields=True,
-            # ),
-            # Table(name="User", replication_key="SystemModstamp"),
+            Table(
+                name="Contact",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(name="User", replication_key="SystemModstamp"),
         ]
 
         advanced_tables = [
-            # Table(
-            #     name="Lead",
-            #     replication_key="SystemModstamp",
-            #     primary_key="Id",
-            #     should_sync_fields=True,
-            # ),
-            # Table(
-            #     name="Campaign",
-            #     replication_key="SystemModstamp",
-            #     primary_key="Id",
-            #     should_sync_fields=True,
-            # ),
-            # Table(name="OpportunityContactRole", replication_key="SystemModstamp"),
-            # Table(
-            #     name="CampaignMember",
-            #     replication_key="SystemModstamp",
-            #     should_sync_fields=True,
-            # ),
-            # Table(
-            #     name="Task",
-            #     replication_key="SystemModstamp",
-            #     should_sync_fields=True,
-            #     apply_weekly_rule=True,
-            # ),
-            # Table(
-            #     name="Event", replication_key="SystemModstamp", should_sync_fields=True
-            # ),
-            # Table(name="RecordType", replication_key="SystemModstamp"),
-            # # History objects
-            # Table(name="AccountHistory", replication_key="CreatedDate"),
-            # Table(
-            #     name="ContactHistory",
-            #     replication_key="CreatedDate",
-            #     apply_weekly_rule=True,
-            # ),
-            # Table(name="LeadHistory", replication_key="CreatedDate"),
-            # Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
+            Table(
+                name="Lead",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(
+                name="Campaign",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            ),
+            Table(name="OpportunityContactRole", replication_key="SystemModstamp"),
+            Table(
+                name="CampaignMember",
+                replication_key="SystemModstamp",
+                should_sync_fields=True,
+            ),
+            Table(
+                name="Task",
+                replication_key="SystemModstamp",
+                should_sync_fields=True,
+                apply_weekly_rule=True,
+            ),
+            Table(
+                name="Event", replication_key="SystemModstamp", should_sync_fields=True
+            ),
+            Table(name="RecordType", replication_key="SystemModstamp"),
+            # History objects
+            Table(name="AccountHistory", replication_key="CreatedDate"),
+            Table(
+                name="ContactHistory",
+                replication_key="CreatedDate",
+                apply_weekly_rule=True,
+            ),
+            Table(name="LeadHistory", replication_key="CreatedDate"),
+            Table(name="OpportunityFieldHistory", replication_key="CreatedDate"),
         ]
 
         selected_tables = free_tables.copy()
@@ -260,14 +260,14 @@ class Salesforce:
         if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
             selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
 
-        # selected_tables.append(
-        #     Table(
-        #         name="Opportunity",
-        #         replication_key="SystemModstamp",
-        #         primary_key="Id",
-        #         should_sync_fields=True,
-        #     )
-        # )
+        selected_tables.append(
+            Table(
+                name="Opportunity",
+                replication_key="SystemModstamp",
+                primary_key="Id",
+                should_sync_fields=True,
+            )
+        )
 
 
         for table in selected_tables:
