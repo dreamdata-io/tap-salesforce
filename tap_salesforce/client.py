@@ -269,6 +269,7 @@ class Salesforce:
             )
         )
 
+
         for table in selected_tables:
             try:
                 table_descriptions = self.describe(table.name)
@@ -386,21 +387,19 @@ class Salesforce:
     def merge_records(
         self, paginators: List[Iterator[Dict]], table: Table
     ) -> Iterator[Dict]:
-        merged_records: Dict[str, Dict] = {}
-        record_order: List[str] = []
+        for records in zip(*paginators):
+            merged_record = {}
+            primary_key = None
+            for record in records:
+                if not primary_key:
+                    primary_key = record[table.primary_key]
+                if primary_key != record[table.primary_key]:
+                    raise PrimaryKeyNotMatch(
+                        f"couldn't merge records with different primary keys: {primary_key} and {record[table.primary_key]}"
+                    )
+                merged_record.update(record)
 
-        for paginator_index, paginator in enumerate(paginators):
-            for record in paginator:
-                pk = record[table.primary_key]
-                if pk not in merged_records:
-                    merged_records[pk] = {}
-                    if paginator_index == 0:
-                        record_order.append(pk)
-                merged_records[pk].update(record)
-
-        # Yield records in the order they appeared in the first paginator
-        for pk in record_order:
-            yield merged_records[pk]
+            yield merged_record
 
     @backoff.on_exception(
         backoff.expo,
