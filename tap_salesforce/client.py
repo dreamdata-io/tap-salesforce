@@ -395,7 +395,7 @@ class Salesforce:
         pk_field = table.primary_key
         # Bounded buffer: when it reaches this size, yield oldest record
         max_buffer_size = 10000
-        merged_records: OrderedDict[str, Dict] = OrderedDict[str, Dict]()
+        merged_records: OrderedDict[str, Any] = OrderedDict()
 
         # Track active paginators
         active_paginators = list(range(len(paginators)))
