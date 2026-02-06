@@ -1,5 +1,6 @@
-from typing import Optional, Dict, List, Iterator
+from typing import Any, Optional, Dict, List, Iterator
 from datetime import datetime, timedelta
+from collections import OrderedDict
 import re
 import backoff
 from pydantic.main import BaseModel
@@ -387,19 +388,46 @@ class Salesforce:
     def merge_records(
         self, paginators: List[Iterator[Dict]], table: Table
     ) -> Iterator[Dict]:
-        for records in zip(*paginators):
-            merged_record = {}
-            primary_key = None
-            for record in records:
-                if not primary_key:
-                    primary_key = record[table.primary_key]
-                if primary_key != record[table.primary_key]:
-                    raise PrimaryKeyNotMatch(
-                        f"couldn't merge records with different primary keys: {primary_key} and {record[table.primary_key]}"
-                    )
-                merged_record.update(record)
+        """
+        Merge records from multiple paginators by primary key.
+        Uses a bounded buffer to limit memory usage.
+        """
+        pk_field = table.primary_key
+        # Bounded buffer: when it reaches this size, yield oldest record
+        max_buffer_size = 10000
+        merged_records: OrderedDict[str, Any] = OrderedDict()
 
-            yield merged_record
+        # Track active paginators
+        active_paginators = list(range(len(paginators)))
+
+        while active_paginators:
+            # Process one record from each active paginator
+            for paginator_idx in active_paginators[:]:  # Copy list to allow modification
+                try:
+                    record = next(paginators[paginator_idx])
+                    pk = record[pk_field]
+
+                    # Merge into buffer
+                    if pk not in merged_records:
+                        merged_records[pk] = {}
+                    merged_records[pk].update(record)
+
+                    # Move to end (LRU order)
+                    merged_records.move_to_end(pk)
+
+                except StopIteration:
+                    # This paginator is exhausted
+                    active_paginators.remove(paginator_idx)
+
+            # If buffer is too large, yield oldest record so we are certain that we have merged from all paginators
+            while len(merged_records) > max_buffer_size:
+                pk, record = merged_records.popitem(last=False)  # Remove oldest
+                yield record
+
+        # Yield all remaining records
+        while merged_records:
+            pk, record = merged_records.popitem(last=False)
+            yield record
 
     @backoff.on_exception(
         backoff.expo,
