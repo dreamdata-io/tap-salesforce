@@ -28,6 +28,13 @@ MAX_QUERY_LENGTH = 10000
 
 LOGGER = singer.get_logger()
 
+QUOTA_PERCENT_FOR_INSTANCE_URL = {
+    "https://pulley.my.salesforce.com": 200.0,
+    "https://maxio.my.salesforce.com": 90.0
+}
+
+DEFAULT_QUOTA_PERCENT_TOTAL = 80.0
+DEFAULT_QUOTA_PERCENT_PER_RUN = 25.0
 
 def log_backoff_attempt(details):
     LOGGER.info(
@@ -159,8 +166,8 @@ class Salesforce:
         refresh_token,
         client_id,
         client_secret,
-        quota_percent_total: float = 80.0,
-        quota_percent_per_run: float = 25.0,
+        quota_percent_total: DEFAULT_QUOTA_PERCENT_TOTAL,
+        quota_percent_per_run: DEFAULT_QUOTA_PERCENT_PER_RUN,
         is_sandbox: bool = False,
     ):
         self.refresh_token = refresh_token
@@ -621,10 +628,8 @@ class Salesforce:
         if match is None:
             return
 
-        if self.instance_url == "https://pulley.my.salesforce.com":
-            return
-
-        used, total = map(int, match.groups())
+        self.quota_percent_total = QUOTA_PERCENT_FOR_INSTANCE_URL.get(self.instance_url, DEFAULT_QUOTA_PERCENT_TOTAL)
+        self.quota_percent_per_run = QUOTA_PERCENT_FOR_INSTANCE_URL.get(self.instance_url, DEFAULT_QUOTA_PERCENT_PER_RUN)
 
         used_percent = (used / total) * 100.0
 
