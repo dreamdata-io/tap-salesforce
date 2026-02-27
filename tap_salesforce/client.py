@@ -166,8 +166,8 @@ class Salesforce:
         refresh_token,
         client_id,
         client_secret,
-        quota_percent_total: DEFAULT_QUOTA_PERCENT_TOTAL,
-        quota_percent_per_run: DEFAULT_QUOTA_PERCENT_PER_RUN,
+        quota_percent_total: float = DEFAULT_QUOTA_PERCENT_TOTAL,
+        quota_percent_per_run: float = DEFAULT_QUOTA_PERCENT_PER_RUN,
         is_sandbox: bool = False,
     ):
         self.refresh_token = refresh_token
