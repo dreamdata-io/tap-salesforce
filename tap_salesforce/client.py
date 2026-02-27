@@ -628,6 +628,7 @@ class Salesforce:
         if match is None:
             return
 
+        used, total = map(int, match.groups())
         self.quota_percent_total = QUOTA_PERCENT_FOR_INSTANCE_URL.get(self.instance_url, DEFAULT_QUOTA_PERCENT_TOTAL)
         self.quota_percent_per_run = QUOTA_PERCENT_FOR_INSTANCE_URL.get(self.instance_url, DEFAULT_QUOTA_PERCENT_PER_RUN)
 
