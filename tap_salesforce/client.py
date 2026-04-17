@@ -266,7 +266,11 @@ class Salesforce:
                 ]
             )
         if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
-            selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
+            existing_names = {t.name for t in selected_tables}
+            selected_tables.extend(
+                t for t in LEGACY_CUSTOMER_OBJECTS[self.instance_url]
+                if t.name not in existing_names
+            )
 
         selected_tables.append(
             Table(
