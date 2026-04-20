@@ -63,9 +63,10 @@ def main_impl():
 
     advanced_features_enabled = args.config.pop("advanced_features_enabled", False)
     custom_objects = args.config.pop("custom_objects", [])
+    special_objects = args.config.pop("special_objects", [])
     missing_tables = []
     try:
-        for table in sf.get_tables(advanced_features_enabled, custom_objects):
+        for table in sf.get_tables(advanced_features_enabled, custom_objects, special_objects):
             if table.not_found:
                 missing_tables.append(table.name)
                 continue
