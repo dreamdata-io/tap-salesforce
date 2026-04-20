@@ -189,7 +189,7 @@ class Salesforce:
         self._login()
 
     def get_tables(
-        self, advanced_features_enabled=False, custom_objects=[]
+        self, advanced_features_enabled=False, custom_objects=[], special_objects=[]
     ) -> Iterator[Table]:
         """returns the supported table names, as well as the replication_key"""
         free_tables = [
@@ -265,8 +265,21 @@ class Salesforce:
                     for custom_object in custom_objects
                 ]
             )
-        if self.instance_url in LEGACY_CUSTOMER_OBJECTS:
-            selected_tables.extend(LEGACY_CUSTOMER_OBJECTS[self.instance_url])
+        if special_objects:
+            LOGGER.info("special objects enabled for account")
+            existing_names = {t.name for t in selected_tables}
+            selected_tables.extend(
+                [
+                    Table(**obj) for obj in special_objects
+                    if obj.get("name") not in existing_names
+                ]
+            )
+        elif self.instance_url in LEGACY_CUSTOMER_OBJECTS:
+            existing_names = {t.name for t in selected_tables}
+            selected_tables.extend(
+                t for t in LEGACY_CUSTOMER_OBJECTS[self.instance_url]
+                if t.name not in existing_names
+            )
 
         selected_tables.append(
             Table(
