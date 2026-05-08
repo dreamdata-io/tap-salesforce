@@ -56,9 +56,6 @@ def main_impl():
     config_start = singer_utils.strptime_with_tz(start_date_conf).astimezone(
         timezone.utc
     )
-    # to avoid sync data while customer updating them, we set the end_time to one hour ago
-    end_time = datetime.now(timezone.utc) - timedelta(hours=1)
-
     stream = Stream(args.state)
 
     advanced_features_enabled = args.config.pop("advanced_features_enabled", False)
@@ -75,6 +72,8 @@ def main_impl():
                     f"skipping stream {table.name} since it does not exist on this account"
                 )
                 continue
+
+            end_time = datetime.now(timezone.utc) - timedelta(minutes=3)
 
             if table.should_sync_fields:
                 stream_id = f"{table.name}Fields"
