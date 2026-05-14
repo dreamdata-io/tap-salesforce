@@ -25,6 +25,7 @@ LOGGER = singer.get_logger()
 
 REQUIRED_CONFIG_KEYS = ["refresh_token", "client_id", "client_secret", "start_date"]
 FOUR_YEARS_AGO = (datetime.now(timezone.utc) - timedelta(days=4 * 365)).date()
+FIVE_YEARS_AGO = (datetime.now(timezone.utc) - timedelta(days=5 * 365)).date()
 
 CONFIG = {
     "refresh_token": None,
@@ -88,7 +89,10 @@ def main_impl():
             )
             resync = table.should_resync_all_historical_data()
             if resync:
-                start_time = FOUR_YEARS_AGO
+                if sf.instance_url == "https://zi.my.salesforce.com" and table.name in ["CampaignMember", "Event"]:
+                    start_time = FIVE_YEARS_AGO
+                else:
+                    start_time = FOUR_YEARS_AGO
 
             field_names = [field["name"] for field in table.fields]
             try:
