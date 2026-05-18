@@ -74,7 +74,10 @@ def main_impl():
                 )
                 continue
 
-            end_time = datetime.now(timezone.utc) - timedelta(minutes=3)
+            end_time_buffer = timedelta(minutes=3)
+            if sf.instance_url == "https://zi.my.salesforce.com" and table.name in ["CampaignMember", "Campaign"]:
+                end_time_buffer = timedelta(seconds=5)
+            end_time = datetime.now(timezone.utc) - end_time_buffer
 
             if table.should_sync_fields:
                 stream_id = f"{table.name}Fields"
