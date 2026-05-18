@@ -74,7 +74,10 @@ def main_impl():
                 )
                 continue
 
-            end_time = datetime.now(timezone.utc) - timedelta(minutes=3)
+            end_time_buffer = timedelta(minutes=3)
+            if sf.instance_url == "https://zi.my.salesforce.com" and table.name in ["CampaignMember", "Campaign"]:
+                end_time_buffer = timedelta(seconds=3)
+            end_time = datetime.now(timezone.utc) - end_time_buffer
 
             if table.should_sync_fields:
                 stream_id = f"{table.name}Fields"
@@ -83,10 +86,11 @@ def main_impl():
 
             LOGGER.info(f"processing stream {table.name}")
 
-            start_time = (
-                stream.get_stream_state(table.name, table.replication_key)
-                or config_start
-            )
+            state_bookmark = stream.get_stream_state(table.name, table.replication_key)
+            start_time = state_bookmark or config_start
+            if state_bookmark is not None:
+                # Re-read an overlap window to catch late-queryable records.
+                start_time = state_bookmark - timedelta(minutes=3)
             resync = table.should_resync_all_historical_data()
             if resync:
                 if sf.instance_url == "https://zi.my.salesforce.com" and table.name in ["CampaignMember", "Event"]:
