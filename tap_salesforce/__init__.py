@@ -76,7 +76,7 @@ def main_impl():
 
             end_time_buffer = timedelta(minutes=3)
             if sf.instance_url == "https://zi.my.salesforce.com" and table.name == "Campaign":
-                end_time_buffer = timedelta(seconds=0)
+                end_time_buffer = timedelta(seconds=-10)
             end_time = datetime.now(timezone.utc) - end_time_buffer
 
             if table.should_sync_fields:
