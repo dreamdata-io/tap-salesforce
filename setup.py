@@ -13,7 +13,7 @@ setup(
     install_requires=[
         "requests==2.22.0",
         "singer-python==5.8.1",
-        "pydantic==1.8.2",
+        "pydantic==1.10.13",
         "backoff==1.8.0",
     ],
     entry_points="""
